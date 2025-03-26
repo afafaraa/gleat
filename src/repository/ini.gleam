@@ -52,8 +52,7 @@ pub fn to_list(path: String) -> List(String) {
   }
   |> string.split("\r\n")
   |> list.map(fn(el) { string.trim(el) })
-  |> list.filter(fn(line) { !string.starts_with(line, "#") })
-  |> echo
+  |> list.filter(fn(line) { !{ string.starts_with(line, "#") || line == "" } })
 }
 
 fn to_dict_inter(
@@ -155,12 +154,9 @@ pub fn write_from_dict(
   let assert Ok(_) = simplifile.write(filepath, "")
   ini
   |> dict.each(fn(title, section) {
-    echo title
     let assert Ok(_) = simplifile.append(filepath, "[" <> title <> "]\r\n")
     section
     |> dict.each(fn(key, value) {
-      echo key
-      echo value
       let assert Ok(_) =
         simplifile.append(filepath, key <> "=" <> value <> "\r\n")
     })

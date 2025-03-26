@@ -1,5 +1,6 @@
 import gleam/dict.{type Dict}
 import gleam/io
+import gleam/string
 import repository/ini
 import simplifile
 
@@ -11,8 +12,8 @@ pub type GleatRepository {
   )
 }
 
-pub fn get_repo(force: Bool) -> GleatRepository {
-  let assert Ok(worktree) = simplifile.current_directory()
+pub fn get_repo(path: String, force: Bool) -> GleatRepository {
+  let worktree = path
   let gleatdir = ini.append_list_to_path(worktree, [".gleat"], False)
 
   case simplifile.is_directory(gleatdir) {
@@ -50,7 +51,9 @@ pub fn get_repo(force: Bool) -> GleatRepository {
     }
   }
 
-  let conf = ini.to_dict(ini.append_list_to_path(gleatdir, ["config"], False))
+  let conf =
+    ini.append_list_to_path(gleatdir, ["config"], False)
+    |> ini.to_dict
 
   case !force {
     True -> {
@@ -72,4 +75,55 @@ pub fn get_repo(force: Bool) -> GleatRepository {
   }
 
   GleatRepository(worktree, conf, gleatdir)
+}
+
+pub fn find_repo(current_path: String, _required: Bool) -> GleatRepository {
+  case
+    simplifile.is_directory(ini.append_list_to_path(
+      current_path,
+      [".gleat"],
+      False,
+    ))
+  {
+    Ok(val) -> {
+      case val {
+        True -> get_repo(current_path, False)
+        False -> {
+          case drop_untill(current_path) {
+            "Not a git directory" -> {
+              io.print_error("Not a git directory")
+              GleatRepository("", dict.new(), "")
+            }
+            path -> find_repo(path, False)
+          }
+        }
+      }
+    }
+    Error(e) -> {
+      io.print_error(simplifile.describe_error(e))
+      GleatRepository("", dict.new(), "")
+    }
+  }
+}
+
+fn drop_untill(str: String) -> String {
+  case string.last(str) {
+    Ok(val) -> {
+      case val {
+        ":" -> {
+          "Not a git directory"
+        }
+        "/" -> {
+          string.drop_end(str, 1) |> echo
+        }
+        _ -> {
+          string.drop_end(str, 1)
+          |> drop_untill
+        }
+      }
+    }
+    Error(_) -> {
+      str
+    }
+  }
 }
