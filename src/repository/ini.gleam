@@ -4,6 +4,43 @@ import gleam/list
 import gleam/string
 import simplifile
 
+// Converts path and list to path:
+// append_list_to_path(path, [to, my, file]) -> path/to/my/file
+// With flag mkdir=True it also will create directories that are missing
+pub fn append_list_to_path(
+  base_path: String,
+  path: List(String),
+  mkdir: Bool,
+) -> String {
+  case path {
+    [el, ..rest] -> {
+      case mkdir {
+        True -> {
+          case simplifile.create_directory(base_path <> "/" <> el) {
+            Ok(_) -> Nil
+            Error(e) -> {
+              io.println(
+                "[INFO]: Directory"
+                <> base_path
+                <> "/"
+                <> el
+                <> " already exists, or "
+                <> simplifile.describe_error(e)
+                <> ". Skipping...",
+              )
+              Nil
+            }
+          }
+          Nil
+        }
+        False -> Nil
+      }
+      append_list_to_path(base_path <> "/" <> el, rest, mkdir)
+    }
+    [] -> base_path
+  }
+}
+
 // Takes ini filepath and returns a list of lines, that are not comments
 // On error it returns ["error message"]
 pub fn to_list(path: String) -> List(String) {

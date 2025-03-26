@@ -1,6 +1,6 @@
 import argv
 import gleam/io
-import repository/repository
+import repository/init
 import simplifile
 
 pub fn main() {
@@ -13,7 +13,7 @@ pub fn main() {
     ["checkout", ..] -> ""
     ["commit", ..] -> ""
     ["init", ..] -> {
-      repository.init(worktree)
+      init.init(worktree)
       "Initialazed empty gleat repository"
     }
     ["log", ..] -> ""
