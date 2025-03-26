@@ -32,7 +32,9 @@ fn append_list_to_path(
                 <> base_path
                 <> "/"
                 <> el
-                <> " already exists. Skipping...",
+                <> " already exists, or "
+                <> simplifile.describe_error(e)
+                <> ". Skipping...",
               )
               Nil
             }

@@ -1,24 +1,14 @@
 # gleat
 
-[![Package Version](https://img.shields.io/hexpm/v/gleat)](https://hex.pm/packages/gleat)
-[![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3)](https://hexdocs.pm/gleat/)
-
+This is a practice projest, purely for fun. It dosen't work YET. Currently working commands:
 ```sh
-gleam add gleat@1
-```
-```gleam
-import gleat
+gleam run init #same as git init, will be replaced by gleat init
 
-pub fn main() {
-  // TODO: An example of the project in use
-}
 ```
 
-Further documentation can be found at <https://hexdocs.pm/gleat>.
+If you want to check it out:
+1. Install gleam from https://gleam.run/getting-started/installing/. If you are on windows I recomend choco for rebar3 and erlang and scoop for gleam.
+2. In ../gleat/src run:
+    - gleam build
+    - gleam run [git command]
 
-## Development
-
-```sh
-gleam run   # Run the project
-gleam test  # Run the tests
-```
