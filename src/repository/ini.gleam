@@ -11,8 +11,40 @@ pub fn append_list_to_path(
   base_path: String,
   path: List(String),
   mkdir: Bool,
+  touch: Bool,
 ) -> String {
   case path {
+    [el] -> {
+      case touch {
+        True -> {
+          case simplifile.create_file(base_path <> "/" <> el) {
+            Ok(_) -> Nil
+            Error(e) -> {
+              io.println(simplifile.describe_error(e))
+            }
+          }
+          base_path <> "/" <> el
+        }
+        False -> {
+          case mkdir {
+            True -> {
+              case simplifile.create_directory(base_path <> "/" <> el) {
+                Ok(_) -> Nil
+                Error(e) -> {
+                  io.println("[ERROR]: " <> simplifile.describe_error(e))
+                  Nil
+                }
+              }
+              base_path <> "/" <> el
+            }
+            False -> {
+              base_path <> "/" <> el
+            }
+          }
+          base_path <> "/" <> el
+        }
+      }
+    }
     [el, ..rest] -> {
       case mkdir {
         True -> {
@@ -35,7 +67,7 @@ pub fn append_list_to_path(
         }
         False -> Nil
       }
-      append_list_to_path(base_path <> "/" <> el, rest, mkdir)
+      append_list_to_path(base_path <> "/" <> el, rest, mkdir, touch)
     }
     [] -> base_path
   }
@@ -83,7 +115,7 @@ fn to_dict_inter(
                   |> fn(d) { dict.insert(res, current_section, d) }
                 }
                 _ -> {
-                  io.print_error(
+                  io.println(
                     "[ERROR]: Cannot find " <> current_section <> " in dict",
                   )
                   dict.new()
@@ -91,7 +123,7 @@ fn to_dict_inter(
               }
             }
             Error(_) -> {
-              io.print_error("[ERROR]: Substring not present")
+              io.println("[ERROR]: Substring not present")
               dict.new()
             }
           }
@@ -131,17 +163,13 @@ pub fn get_from_dict(
           val
         }
         _ -> {
-          io.print_error(
-            "[ERROR]: could not resolve " <> key <> " in ini file.",
-          )
+          io.println("[ERROR]: could not resolve " <> key <> " in ini file.")
           ""
         }
       }
     }
     _ -> {
-      io.print_error(
-        "[ERROR]: could not resolve " <> section <> " in ini file.",
-      )
+      io.println("[ERROR]: could not resolve " <> section <> " in ini file.")
       ""
     }
   }
@@ -151,14 +179,52 @@ pub fn write_from_dict(
   ini: Dict(String, Dict(String, String)),
   filepath: String,
 ) {
-  let assert Ok(_) = simplifile.write(filepath, "")
+  case simplifile.write(filepath, "") {
+    Ok(_) -> Nil
+    Error(e) -> {
+      io.println(
+        "[ERROR]: Could not write to file "
+        <> filepath
+        <> " becouse of "
+        <> simplifile.describe_error(e),
+      )
+      Nil
+    }
+  }
   ini
   |> dict.each(fn(title, section) {
-    let assert Ok(_) = simplifile.append(filepath, "[" <> title <> "]\r\n")
+    case simplifile.append(filepath, "[" <> title <> "]\r\n") {
+      Ok(_) -> Nil
+      Error(e) -> {
+        io.println(
+          "[ERROR]: Could not append "
+          <> title
+          <> " to file "
+          <> filepath
+          <> " becouse of "
+          <> simplifile.describe_error(e),
+        )
+        Nil
+      }
+    }
     section
     |> dict.each(fn(key, value) {
-      let assert Ok(_) =
-        simplifile.append(filepath, key <> "=" <> value <> "\r\n")
+      case simplifile.append(filepath, key <> "=" <> value <> "\r\n") {
+        Ok(_) -> Nil
+        Error(e) -> {
+          io.println(
+            "[ERROR]: Could not append "
+            <> key
+            <> ", "
+            <> value
+            <> " to file "
+            <> filepath
+            <> " becouse of "
+            <> simplifile.describe_error(e),
+          )
+          Nil
+        }
+      }
     })
   })
 }

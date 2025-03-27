@@ -14,7 +14,7 @@ pub type GleatRepository {
 
 pub fn get_repo(path: String, force: Bool) -> GleatRepository {
   let worktree = path
-  let gleatdir = ini.append_list_to_path(worktree, [".gleat"], False)
+  let gleatdir = ini.append_list_to_path(worktree, [".gleat"], False, False)
 
   case simplifile.is_directory(gleatdir) {
     Ok(is_directory) ->
@@ -34,7 +34,12 @@ pub fn get_repo(path: String, force: Bool) -> GleatRepository {
   }
 
   case
-    simplifile.is_file(ini.append_list_to_path(gleatdir, ["config"], False))
+    simplifile.is_file(ini.append_list_to_path(
+      gleatdir,
+      ["config"],
+      False,
+      False,
+    ))
   {
     Ok(res) -> {
       case res {
@@ -52,7 +57,7 @@ pub fn get_repo(path: String, force: Bool) -> GleatRepository {
   }
 
   let conf =
-    ini.append_list_to_path(gleatdir, ["config"], False)
+    ini.append_list_to_path(gleatdir, ["config"], False, False)
     |> ini.to_dict
 
   case !force {
@@ -82,6 +87,7 @@ pub fn find_repo(current_path: String, _required: Bool) -> GleatRepository {
     simplifile.is_directory(ini.append_list_to_path(
       current_path,
       [".gleat"],
+      False,
       False,
     ))
   {

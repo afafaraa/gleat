@@ -1,6 +1,8 @@
 import argv
+import commands/init
 import gleam/io
-import repository/init
+import repository/gleat_obj
+import repository/ini
 import simplifile
 
 pub fn main() {
@@ -14,11 +16,16 @@ pub fn main() {
     ["commit", ..] -> ""
     ["init", ..] -> {
       init.init(worktree)
-      "Initialazed empty gleat repository"
+      |> echo
+      "[INFO] Initialazed empty gleat repository"
     }
     ["log", ..] -> ""
     ["status", ..] -> ""
     ["test", ..] -> {
+      let assert Ok(val) = simplifile.current_directory()
+      init.init(worktree)
+      |> gleat_obj.read_object("5cb6827c4732fbdc5152dbfa886ec19a183cdb49")
+      |> echo
       ""
     }
     _ -> "[ERROR]: Unknown gleat command!"

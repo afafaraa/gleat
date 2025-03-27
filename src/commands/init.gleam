@@ -22,44 +22,56 @@ pub fn init(path: String) -> repository.GleatRepository {
     }
   }
 
-  let gleatdir = ini.append_list_to_path(path, [".gleat"], True)
-  ini.append_list_to_path(gleatdir, ["refs", "tags"], True)
-  ini.append_list_to_path(gleatdir, ["refs", "heads"], True)
-  ini.append_list_to_path(gleatdir, ["objects"], True)
-  ini.append_list_to_path(gleatdir, ["branches"], True)
+  let gleatdir = ini.append_list_to_path(path, [".gleat"], True, False)
+  ini.append_list_to_path(gleatdir, ["refs", "tags"], True, False)
+  ini.append_list_to_path(gleatdir, ["refs", "heads"], True, False)
+  ini.append_list_to_path(gleatdir, ["objects"], True, False)
+  ini.append_list_to_path(gleatdir, ["branches"], True, False)
 
   result.unwrap(
     simplifile.create_file(ini.append_list_to_path(
       gleatdir,
       ["description"],
       False,
+      False,
     )),
     Nil,
   )
   result.unwrap(
     simplifile.write(
-      ini.append_list_to_path(gleatdir, ["description"], False),
+      ini.append_list_to_path(gleatdir, ["description"], False, False),
       "Unnamed repository; edit this file 'description' to name the repository.\n",
     ),
     Nil,
   )
   result.unwrap(
-    simplifile.create_file(ini.append_list_to_path(gleatdir, ["HEAD"], False)),
+    simplifile.create_file(ini.append_list_to_path(
+      gleatdir,
+      ["HEAD"],
+      False,
+      False,
+    )),
     Nil,
   )
   result.unwrap(
     simplifile.write(
-      ini.append_list_to_path(gleatdir, ["HEAD"], False),
+      ini.append_list_to_path(gleatdir, ["HEAD"], False, False),
       "ref: refs/heads/master\n",
     ),
     Nil,
   )
   result.unwrap(
-    simplifile.create_file(ini.append_list_to_path(gleatdir, ["config"], False)),
+    simplifile.create_file(ini.append_list_to_path(
+      gleatdir,
+      ["config"],
+      False,
+      False,
+    )),
     Nil,
   )
 
-  let conf = ini.to_dict(ini.append_list_to_path(gleatdir, ["config"], False))
+  let conf =
+    ini.to_dict(ini.append_list_to_path(gleatdir, ["config"], False, False))
   conf
   |> dict.insert("core", case dict.get(conf, "core") {
     Ok(res) -> {
@@ -80,11 +92,16 @@ pub fn init(path: String) -> repository.GleatRepository {
       ])
     }
   })
-  |> ini.write_from_dict(ini.append_list_to_path(gleatdir, ["config"], False))
+  |> ini.write_from_dict(ini.append_list_to_path(
+    gleatdir,
+    ["config"],
+    False,
+    False,
+  ))
 
   repository.GleatRepository(
     path,
-    ini.to_dict(ini.append_list_to_path(gleatdir, ["config"], False)),
+    ini.to_dict(ini.append_list_to_path(gleatdir, ["config"], False, False)),
     gleatdir,
   )
 }
