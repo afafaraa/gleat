@@ -1,8 +1,9 @@
 import argv
 import commands/init
+import gleam/bit_array
 import gleam/io
-import repository/gleat_obj
-import repository/ini
+import repository/gleat_obj.{Tree}
+import repository/repository
 import simplifile
 
 pub fn main() {
@@ -11,7 +12,7 @@ pub fn main() {
 
   case argv.load().arguments {
     ["add", ..] -> "[INFO] added"
-    ["cat-file", ..] -> ""
+    ["cat-file", obj_type, object] -> ""
     ["checkout", ..] -> ""
     ["commit", ..] -> ""
     ["init", ..] -> {
@@ -22,10 +23,6 @@ pub fn main() {
     ["log", ..] -> ""
     ["status", ..] -> ""
     ["test", ..] -> {
-      let assert Ok(val) = simplifile.current_directory()
-      init.init(worktree)
-      |> gleat_obj.read_object("5cb6827c4732fbdc5152dbfa886ec19a183cdb49")
-      |> echo
       ""
     }
     _ -> "[ERROR]: Unknown gleat command!"
