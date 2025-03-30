@@ -1,6 +1,6 @@
 import argv
-import commands/cat_file
 import commands/init
+import commands/show
 import gleam/bit_array
 import gleam/io
 import repository/gleat_obj.{Tree}
@@ -14,7 +14,7 @@ pub fn main() {
   case argv.load().arguments {
     ["add", ..] -> "[INFO] added"
     ["show", obj_type, object] -> {
-      cat_file.cat_file(worktree, obj_type, object)
+      show.show(worktree, obj_type, object)
       ""
     }
     ["checkout", ..] -> ""
