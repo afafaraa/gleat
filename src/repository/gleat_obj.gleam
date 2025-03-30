@@ -1,3 +1,6 @@
+import error/error.{
+  type GleatError, MalformedObjectError, MissingFileError, UnknownObjectType,
+}
 import gleam/bit_array
 import gleam/crypto
 import gleam/int
@@ -10,20 +13,11 @@ import repository/ini
 import repository/repository.{type GleatRepository}
 import simplifile
 
-pub type GleatError {
-  ObjectReadError
-  ObjectWriteError
-}
-
 pub type GleatObject {
   Blob(fmt: BitArray, data: BitArray)
   Commit(fmt: BitArray, data: BitArray)
   Tree(fmt: BitArray, data: BitArray)
   Tag(fmt: BitArray, data: BitArray)
-}
-
-pub fn serialize(obj: GleatObject) -> BitArray {
-  obj.data
 }
 
 pub fn read_obj(
@@ -77,24 +71,23 @@ pub fn read_obj(
             "tree" -> Ok(Tree(fmt, data))
             "tag" -> Ok(Tag(fmt, data))
             "blob" -> Ok(Blob(fmt, data))
-            _ -> Error(ObjectReadError)
+            _ -> Error(UnknownObjectType)
           }
         }
-        _ -> Error(ObjectReadError)
+        _ -> Error(MalformedObjectError)
       }
     }
     False -> {
-      Error(ObjectReadError)
+      Error(MissingFileError)
     }
   }
 }
 
-pub fn write_obj(obj: GleatObject, repo: GleatRepository) {
-  let data = serialize(obj)
+pub fn write_obj(obj: GleatObject, repo: GleatRepository) -> Result(Nil, Nil) {
+  let data = obj.data
   let len = bit_array.byte_size(data) |> int.to_string |> bit_array.from_string
   let result = bit_array.concat([obj.fmt, <<32>>, len, <<0>>, data])
   let sha = crypto.hash(crypto.Sha1, result) |> bit_array_ext.dec_to_string_hex
-  echo sha
   let path =
     ini.append_list_to_path(
       repo.gleatdir,
@@ -107,9 +100,15 @@ pub fn write_obj(obj: GleatObject, repo: GleatRepository) {
       True,
     )
   case path {
-    "" -> Nil
+    "" -> Error(Nil)
     _ -> {
-      result.unwrap(simplifile.write_bits(path, gzlib.compress(result)), Nil)
+      simplifile.write_bits(path, gzlib.compress(result)) |> result.unwrap(Nil)
+      Ok(Nil)
     }
   }
+}
+
+// Funtion to refer to gleam object by parameters, for now only by full object hash
+pub fn find_obj(repo: GleatRepository, name: String, fmt: String, follow: Bool) {
+  name
 }

@@ -1,4 +1,5 @@
 import argv
+import commands/cat_file
 import commands/init
 import gleam/bit_array
 import gleam/io
@@ -12,7 +13,10 @@ pub fn main() {
 
   case argv.load().arguments {
     ["add", ..] -> "[INFO] added"
-    ["cat-file", obj_type, object] -> ""
+    ["show", obj_type, object] -> {
+      cat_file.cat_file(worktree, obj_type, object)
+      ""
+    }
     ["checkout", ..] -> ""
     ["commit", ..] -> ""
     ["init", ..] -> {
