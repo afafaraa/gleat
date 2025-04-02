@@ -112,3 +112,25 @@ pub fn write_obj(obj: GleatObject, repo: GleatRepository) -> Result(Nil, Nil) {
 pub fn find_obj(repo: GleatRepository, name: String, fmt: String, follow: Bool) {
   name
 }
+
+pub fn create_obj(data: BitArray, obj_type: String) -> Result(GleatObject, Nil) {
+  let fmt = bit_array.from_string(obj_type)
+
+  case obj_type {
+    "commit" -> {
+      Ok(Commit(fmt, data))
+    }
+    "blob" -> {
+      Ok(Blob(fmt, data))
+    }
+    "tree" -> {
+      Ok(Tree(fmt, data))
+    }
+    "tag" -> {
+      Ok(Tag(fmt, data))
+    }
+    _ -> {
+      Error(Nil)
+    }
+  }
+}
